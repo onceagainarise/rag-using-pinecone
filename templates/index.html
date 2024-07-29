@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chatbot Interface</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <video autoplay muted loop id="background-video">
+      <source
+        src="{{ url_for('static', filename='background.mp4') }}"
+        type="video/mp4"
+      />
+      Your browser does not support the video tag.
+    </video>
+    <div class="icon-container">
+      <img
+        src="{{ url_for('static', filename='icon.png') }}"
+        alt="Icon"
+        class="icon"
+      />
+    </div>
+    <div class="logout-container">
+      <form action="/logout" method="POST">
+        <button type="submit">Logout</button>
+      </form>
+    </div>
+
+    <div class="intro-container">
+      <h1>Welcome to Data Retrieval via LLM</h1>
+      <input
+        type="text"
+        id="user-query"
+        placeholder="Type your question here..."
+      />
+      <button onclick="sendQuery()">Ask</button>
+    </div>
+    <div class="chat-container hidden">
+      <h1>Chat with DR-TL</h1>
+      <div id="chat-box"></div>
+      <input
+        type="text"
+        id="user-query-popup"
+        placeholder="Type your question here..."
+      />
+      <button onclick="sendQueryPopup()">Ask</button>
+    </div>
+    <script>
+      async function loadChatHistory() {
+        const response = await fetch("/history");
+        const chatHistory = await response.json();
+        const chatBox = document.getElementById("chat-box");
+        chatHistory.forEach((message) => {
+          chatBox.innerHTML += `<div class="message user-message"><strong>You:</strong> ${message.user}</div>`;
+          chatBox.innerHTML += `<div class="message bot-message"><strong>Bot:</strong> ${message.bot}</div>`;
+        });
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+      async function sendQuery() {
+        const query = document.getElementById("user-query").value;
+        const response = await fetch("/ask", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ query }),
+        });
+        const data = await response.json();
+        document.querySelector(".intro-container").classList.add("hidden");
+        const chatContainer = document.querySelector(".chat-container");
+        chatContainer.classList.remove("hidden");
+        const chatBox = document.getElementById("chat-box");
+        chatBox.innerHTML += `<div class="message user-message"><strong>You:</strong> ${query}</div>`;
+        chatBox.innerHTML += `<div class="message bot-message"><strong>Bot:</strong> ${data.answer}</div>`;
+        document.getElementById("user-query-popup").value = "";
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+      async function sendQueryPopup() {
+        const query = document.getElementById("user-query-popup").value;
+        const response = await fetch("/ask", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ query }),
+        });
+        const data = await response.json();
+        const chatBox = document.getElementById("chat-box");
+        chatBox.innerHTML += `<div class="message user-message"><strong>You:</strong> ${query}</div>`;
+        chatBox.innerHTML += `<div class="message bot-message"><strong>Bot:</strong> ${data.answer}</div>`;
+        document.getElementById("user-query-popup").value = "";
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+      document.addEventListener("DOMContentLoaded", loadChatHistory);
+    </script>
+  </body>
+</html>
