@@ -10,13 +10,13 @@ from pinecone import Pinecone, ServerlessSpec
 from dotenv import load_dotenv
 from langchain.schema import Document 
 
-# Load environment variables from .env file
+
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY', 'your_secret_key')  # Set your secret key here
+app.secret_key = os.getenv('SECRET_KEY', 'your_secret_key') 
 
-# Initialize your existing code
+
 directory = 'pdfstore'
 
 def read_doc(directory):
@@ -105,10 +105,10 @@ def login():
 
     if username == stored_username and check_password_hash(stored_password_hash, password):
         session['username'] = username
-        session['chat_history'] = []  # Initialize chat history in session
+        session['chat_history'] = []  
         return redirect(url_for('chat'))
     
-    # Redirect back to login page with error message
+  
     return render_template('login.html', error='Invalid credentials')
 
 
@@ -133,7 +133,7 @@ def ask():
         return jsonify({'error': 'No query provided'}), 400
     try:
         answer = retrieve_answers(user_query)
-        # Save the question and answer to session chat history
+
         if 'chat_history' in session:
             session['chat_history'].append({'user': user_query, 'bot': answer})
         else:
